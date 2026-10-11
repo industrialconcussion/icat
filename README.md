@@ -13,7 +13,7 @@ A free, single-file web app for recognizing and documenting suspected concussion
 To run it offline, download `index.html` and open it in any modern browser.
 
 ## Important
-ICAT is not a diagnostic instrument. It does not replace licensed medical evaluation, clinical judgment, your organization's policies, or applicable regulations. Educational use by qualified professionals only; not medical advice.
+ICAT is not a diagnostic instrument. It does not replace licensed medical evaluation, clinical judgment, your organization's policies, or applicable regulations. Educational use only; not medical advice.
 
 ## License
 - **App code (this repository):** MIT License. See [LICENSE](LICENSE).
