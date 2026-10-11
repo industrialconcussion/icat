@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICAT — Industrial Concussion Assessment Tool</title>
+<title>ICAT: Industrial Concussion Assessment Tool</title>
+<link rel="icon" type="image/png" href="ici-logo-navy.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -22,8 +23,6 @@ button{font-family:var(--body);cursor:pointer}
 /* ---------- header ---------- */
 header.app{background:var(--steel-dk);color:#fff;padding:14px 0}
 header.app .wrap{padding-bottom:0;display:flex;align-items:center;gap:14px}
-.mark{width:40px;height:40px;flex:none;background:var(--paper);color:var(--steel-dk);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:.02em;transform:rotate(45deg);border:3px solid var(--amber)}
-.mark span{transform:rotate(-45deg)}
 header.app h1{font-family:var(--disp);font-weight:800;font-size:22px;letter-spacing:.03em;text-transform:uppercase}
 header.app p{font-size:12px;color:#B9CBD8;margin-top:1px}
 /* ---------- pathway rail ---------- */
@@ -122,7 +121,17 @@ h2.step{font-family:var(--disp);font-weight:800;font-size:27px;line-height:1.1;m
 .rep td:first-child{width:42%;color:var(--mut)}
 .rep .pos{color:var(--signal);font-weight:700}
 .rep .neg{color:var(--green);font-weight:600}
-.sigline{margin-top:34px;border-top:1px solid var(--ink);padding-top:4px;font-size:12px;width:260px;display:inline-block;margin-right:40px}
+.rep .nr{color:var(--mut);font-style:italic}
+.rep td{white-space:pre-wrap;overflow-wrap:anywhere}
+.rep .rnote{font-size:12px;color:var(--mut);font-style:italic;margin:0 0 4px}
+.rep .rtext{font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.sigrow{display:flex;gap:28px;flex-wrap:wrap}
+.sigline{margin-top:30px;border-top:1px solid var(--ink);padding-top:4px;font-size:12px;flex:1 1 200px;min-width:180px}
+.sigline.wide{flex:2 1 280px}
+.printhead{align-items:center;gap:14px;margin-bottom:8px;padding-bottom:8px;border-bottom:3px solid var(--steel-dk)}
+.printhead img{display:block;width:52px;height:52px;flex:none}
+.ph-title{font-family:var(--disp);font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.02em;color:var(--steel-dk)}
+.ph-sub{font-size:11px;color:var(--mut)}
 .legal{font-size:11.5px;color:var(--mut);margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
 .badge-em{display:inline-block;background:var(--signal);color:#fff;font-weight:800;font-family:var(--disp);padding:3px 10px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase}
 .badge-warn{display:inline-block;background:var(--amber);color:#fff;font-weight:800;font-family:var(--disp);padding:3px 10px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase}
@@ -140,13 +149,26 @@ h2.step{font-family:var(--disp);font-weight:800;font-size:27px;line-height:1.1;m
 .sumsg.err{color:var(--signal)}
 /* print */
 .printonly{display:none}
+@page{size:letter;margin:0.6in 0.6in 0.7in;
+  @top-left{font-family:Arial,sans-serif;font-size:8pt;color:#5C6B77}
+  @bottom-left{content:"Educational use only. Not a diagnostic instrument.   \00A9  Industrial Concussion Institute LLC";font-family:Arial,sans-serif;font-size:8pt;color:#5C6B77}
+  @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:Arial,sans-serif;font-size:8pt;color:#5C6B77}}
 @media print{
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;font-size:12px}
-  header.app,.rail,.nav,.noprint{display:none!important}
-  .card{border:none;padding:0;margin-top:0}
+  header.app,.rail,.nav,.noprint,footer.app-footer{display:none!important}
+  .card{border:none;padding:0;margin-top:0;animation:none!important}
   .printonly{display:block} .printonly.printhead{display:flex}
+  .printhead img{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .wrap{max-width:100%;padding:0}
-  .rep h3{font-size:14px}
+  .rep h3{font-size:12.5px;margin:10px 0 3px;padding-bottom:2px;break-after:avoid;page-break-after:avoid}
+  .rep table{font-size:10.5px;line-height:1.3}
+  .rep td{padding:2px 6px}
+  .rep td:first-child{width:46%}
+  .rep tr{break-inside:avoid;page-break-inside:avoid}
+  .rsec{break-inside:avoid;page-break-inside:avoid}
+  .sigblock{break-inside:avoid;page-break-inside:avoid}
+  .sigline{margin-top:26px}
 }
 @media(prefers-reduced-motion:no-preference){.card{animation:up .25s ease}@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
 </style>
@@ -171,7 +193,8 @@ h2.step{font-family:var(--disp);font-weight:800;font-size:27px;line-height:1.1;m
 const S = { // state
   role:null, step:0, emsLock:false,
   worker:{}, redflags:[], mech:{}, signs:[], sympQuick:[], witness:{},
-  imm:[], symp:{}, sympMods:{}, orient:{}, cog:{}, neuro:{}, bess:{}, voms:{}, injrep:{}, ems:{}, vit:{}, trans:{}, transChk:[], notes:"", disp:"", rtw:""
+  imm:[], symp:{}, sympMods:{}, orient:{}, cog:{}, neuro:{}, bess:{}, voms:{}, injrep:{}, ems:{}, vit:{}, trans:{}, transChk:[], notes:"", disp:"", rtw:"",
+  visited:[], started:null // on-device only; used for the report
 };
 
 // Max time allocations by age band (provisional pending site baselines; derived from healthy-adult normative data)
@@ -249,16 +272,16 @@ function steps(){
 
 /* ================= ESCALATION LOGIC ================= */
 function outcome(){
-  if(S.redflags.length||vitalEmergency()) return {lvl:"em",badge:"badge-em",title:"Activate Emergency Response — Call 911 / EMS",
+  if(S.redflags.length||vitalEmergency()) return {lvl:"em",badge:"badge-em",title:"Activate Emergency Response: Call 911 / EMS",
     body:"One or more red flags or critical objective findings (GCS below 15, abnormal pupils, or SpO\u2082 below 92%) are present. Do not leave the worker alone. Do not allow the worker to drive. If neck injury is possible, do not move the worker. Hand off directly to EMS and provide this report. Report the injury through the organization's injury-reporting process and notify leadership."};
   const symptomatic = S.signs.length || S.sympQuick.length ||
     Object.values(S.symp).some(v=>v>0) ||
     Object.values(S.orient).includes("no") || Object.values(S.neuro).includes("abn") ||
     (S.cog.monthsErr==="yes"||S.cog.digitsErr==="yes") || S.vit.concern==="yes" || S.vit.nystag==="abn" ||
     S.bess.stance==="yes" || S.bess.concern==="yes" || gaitExceeded() || vomsPositive();
-  if(symptomatic) return {lvl:"warn",badge:"badge-warn",title:"Remove From Duty — Same-Day Medical Evaluation",
+  if(symptomatic) return {lvl:"warn",badge:"badge-warn",title:"Remove From Duty: Same-Day Medical Evaluation",
     body:"Signs or symptoms consistent with possible concussion are present. Remove the worker from all safety-sensitive tasks immediately. Report the injury through the organization's injury-reporting process and notify leadership. Arrange same-day evaluation through onsite medical and a licensed clinician. Arrange safe transport; the worker must not drive alone. Provide the worker and their contact with take-home monitoring guidance."};
-  return {lvl:"ok",badge:"badge-ok",title:"No Findings Now — Monitor Per Protocol",
+  return {lvl:"ok",badge:"badge-ok",title:"No Findings Now: Monitor Per Protocol",
     body:"No red flags, signs, or symptoms identified at this time. Report the injury through the organization's injury-reporting process and notify leadership. Reporting is required for every suspected head-injury event, including no-findings outcomes. Symptoms can be delayed: keep the worker off safety-sensitive tasks pending recheck, re-screen before end of shift, instruct the worker to report any new symptom immediately, and document this assessment. Escalate at once if anything changes."};
 }
 
@@ -306,6 +329,7 @@ function bindInputs(){
 }
 function go(d){
   if(d>0&&S.step===0&&!S.role){alert("Select a responder path to continue.");return;}
+  if(d>0&&S.step===0&&!S.started)S.started=Date.now();
   S.step=Math.max(0,Math.min(steps().length-1,S.step+d));
   window.scrollTo({top:0});render();
 }
@@ -316,6 +340,7 @@ function jumpDecision(){S.step=steps().indexOf("Decision");window.scrollTo({top:
 function render(){
   rail();
   const name=steps()[S.step];
+  if(!S.visited.includes(name))S.visited.push(name);
   const fn={
     "Incident":scrIncident,"Immediate Response":scrImmediate,"Red Flag Gate":scrGate,
     "Mechanism":scrMech,"Observable Signs":scrSigns,"Reported Symptoms":scrQuickSymp,
@@ -365,7 +390,7 @@ function scrImmediate(){
 
 function scrGate(){
   return `<div class="gate" style="margin-top:14px">
-    <div class="ghd"><span class="dm"></span><h3>Red Flag Gate — check every item</h3></div>
+    <div class="ghd"><span class="dm"></span><h3>Red Flag Gate: check every item</h3></div>
     <div class="gbody">
       <p class="lede">If <b>any</b> red flag is present, this becomes a medical emergency. Check all that apply.</p>
       ${RED_FLAGS.map(([t,s])=>`<label class="chk red"><input type="checkbox" ${S.redflags.includes(t)?"checked":""} onchange="toggleList('redflags','${t}')"><span><b>${t}</b>${s?`<small>${s}</small>`:""}</span></label>`).join("")}
@@ -375,9 +400,9 @@ function scrGate(){
           <p>Stay with the worker. Do not move them if neck injury is possible. Do not let them drive. Skip to the report and hand it to EMS.</p>
         </div></div>
         <div class="nav noprint"><button class="btn ghost" onclick="go(-1)">Back</button>
-        <button class="btn em" onclick="jumpDecision()">EMS activated — record response & decision</button>
+        <button class="btn em" onclick="jumpDecision()">EMS activated: record response & decision</button>
         <button class="btn ghost" onclick="go(1)">Continue assessment</button></div>`
-      :nav("No red flags — continue")}
+      :nav("No red flags, continue")}
     </div></div>`;
 }
 
@@ -387,7 +412,7 @@ function scrMech(){
   <h2 class="step">What happened</h2>
   <div class="f"><label>Primary mechanism</label>
     <select data-bind="mech.type"><option value="">Select…</option>
-      <option>Slip, trip, or fall — same level</option>
+      <option>Slip, trip, or fall (same level)</option>
       <option>Fall from height (ladder, platform, dock)</option>
       <option>Struck by falling object</option>
       <option>Struck by / against equipment or structure</option>
@@ -446,40 +471,40 @@ function scrVitals(){
   <div class="grid2">
     <div class="f"><label>Heart rate (bpm)</label><input type="number" min="0" data-bind="vit.hr"></div>
     <div class="f"><label>Blood pressure (mmHg)</label><input type="text" data-bind="vit.bp" placeholder="e.g., 128/82"></div>
-    <div class="f"><label>Pulse ox — SpO\u2082 (%)</label><input type="number" min="0" max="100" data-bind="vit.spo2" onchange="render()">${spoCrit?`<small style="color:var(--signal);font-weight:700">Below 92% — critical finding</small>`:""}</div>
-    <div class="f"><label>Respiratory rate (breaths/min) — optional</label><input type="number" min="0" data-bind="vit.rr"></div>
-    <div class="f"><label>Temperature — optional</label><input type="text" data-bind="vit.temp" placeholder="e.g., 98.6 °F"></div>
+    <div class="f"><label>Pulse ox: SpO\u2082 (%)</label><input type="number" min="0" max="100" data-bind="vit.spo2" onchange="render()">${spoCrit?`<small style="color:var(--signal);font-weight:700">Below 92%: critical finding</small>`:""}</div>
+    <div class="f"><label>Respiratory rate (breaths/min), optional</label><input type="number" min="0" data-bind="vit.rr"></div>
+    <div class="f"><label>Temperature, optional</label><input type="text" data-bind="vit.temp" placeholder="e.g., 98.6 °F"></div>
   </div>
-  <div class="guide"><b>Glasgow Coma Scale.</b> Select each response — the total calculates automatically. Any score below 15 is an emergency escalation.</div>
+  <div class="guide"><b>Glasgow Coma Scale.</b> Select each response; the total calculates automatically. Any score below 15 is an emergency escalation.</div>
   <div class="grid2">
     <div class="f"><label>Eye opening (E)</label>
       <select data-bind="vit.gcsE" onchange="render()"><option value="">Select…</option>
-        <option value="4">4 — Spontaneous</option><option value="3">3 — To voice</option>
-        <option value="2">2 — To pain</option><option value="1">1 — None</option></select></div>
+        <option value="4">4: Spontaneous</option><option value="3">3: To voice</option>
+        <option value="2">2: To pain</option><option value="1">1: None</option></select></div>
     <div class="f"><label>Verbal response (V)</label>
       <select data-bind="vit.gcsV" onchange="render()"><option value="">Select…</option>
-        <option value="5">5 — Oriented</option><option value="4">4 — Confused</option>
-        <option value="3">3 — Inappropriate words</option><option value="2">2 — Incomprehensible sounds</option>
-        <option value="1">1 — None</option></select></div>
+        <option value="5">5: Oriented</option><option value="4">4: Confused</option>
+        <option value="3">3: Inappropriate words</option><option value="2">2: Incomprehensible sounds</option>
+        <option value="1">1: None</option></select></div>
     <div class="f"><label>Motor response (M)</label>
       <select data-bind="vit.gcsM" onchange="render()"><option value="">Select…</option>
-        <option value="6">6 — Obeys commands</option><option value="5">5 — Localizes pain</option>
-        <option value="4">4 — Withdraws from pain</option><option value="3">3 — Abnormal flexion</option>
-        <option value="2">2 — Extension</option><option value="1">1 — None</option></select></div>
+        <option value="6">6: Obeys commands</option><option value="5">5: Localizes pain</option>
+        <option value="4">4: Withdraws from pain</option><option value="3">3: Abnormal flexion</option>
+        <option value="2">2: Extension</option><option value="1">1: None</option></select></div>
     <div class="f"><label>GCS total</label>
-      <div style="font-family:var(--disp);font-weight:800;font-size:26px;color:${g!==null&&g<15?"var(--signal)":"var(--steel)"};padding:4px 0">${g!==null?g+" / 15":"— / 15"}</div></div>
+      <div style="font-family:var(--disp);font-weight:800;font-size:26px;color:${g!==null&&g<15?"var(--signal)":"var(--steel)"};padding:4px 0">${g!==null?g+" / 15":"Incomplete"}</div></div>
   </div>
-  <div class="guide"><b>Pupil reflex & eye tracking.</b> Verify the pupil reflex — both pupils should constrict briskly and equally. Then observe eye tracking.</div>
+  <div class="guide"><b>Pupil reflex & eye tracking.</b> Verify the pupil reflex: both pupils should constrict briskly and equally. Then observe eye tracking.</div>
   ${ynRow("Pupil reflex","Both pupils equal, round, and briskly reactive to light","vit","pupil","na")}
   ${ynRow("Eye tracking","Worker follows a target side-to-side and up-down; watch for involuntary rhythmic eye movements","vit","nystag","na")}
   ${ynRow("Are vital signs a clinical concern?","Judge heart rate, blood pressure, and respiration against expected values for this worker","vit","concern")}
   ${vitalEmergency()?`
     <div class="banner em"><span class="dm"></span><div>
-      <h4>Critical finding — activate EMS now</h4>
+      <h4>Critical finding: activate EMS now</h4>
       <p>GCS below 15, abnormal pupil response, or SpO\u2082 below 92% requires emergency escalation. Stay with the worker and hand off directly to EMS with this report.</p>
     </div></div>
     <div class="nav noprint"><button class="btn ghost" onclick="go(-1)">Back</button>
-    <button class="btn em" onclick="jumpDecision()">EMS activated — record response & decision</button>
+    <button class="btn em" onclick="jumpDecision()">EMS activated: record response & decision</button>
     <button class="btn ghost" onclick="go(1)">Continue assessment</button></div>`
   :nav()}</div>`;
 }
@@ -488,13 +513,13 @@ function scrTrans(){
   const em=S.redflags.length||vitalEmergency();
   if(em) return `<div class="card">
   <div class="eyebrow">Step · Transition to onsite medical</div>
-  <h2 class="step">Do not transition — EMS pathway active</h2>
+  <h2 class="step">Do not transition: EMS pathway active</h2>
   <div class="banner em"><span class="dm"></span><div>
     <h4>The worker stays at the location</h4>
     <p>Red flags or critical findings are present. Do not move the worker to onsite medical. Remain at the incident location, keep the worker still and monitored, and hand off directly to EMS with this report.</p>
   </div></div>
   <div class="nav noprint"><button class="btn ghost" onclick="go(-1)">Back</button>
-  <button class="btn em" onclick="jumpDecision()">EMS activated — record response & decision</button></div></div>`;
+  <button class="btn em" onclick="jumpDecision()">EMS activated: record response & decision</button></div></div>`;
   return `<div class="card">
   <div class="eyebrow">Step · Transition to onsite medical</div>
   <h2 class="step">Move from location to onsite medical</h2>
@@ -508,7 +533,7 @@ function scrTrans(){
     <div class="f"><label>Departure from location</label><input type="time" data-bind="trans.depart"></div>
     <div class="f"><label>Arrival at onsite medical</label><input type="time" data-bind="trans.arrive"></div>
   </div>
-  <div class="guide"><b>If anything changes en route</b> — new or worsening symptoms, vomiting, increasing drowsiness or confusion — stop, return to the Red Flag Gate, and re-screen before continuing.</div>
+  <div class="guide"><b>If anything changes en route</b> (new or worsening symptoms, vomiting, increasing drowsiness or confusion), stop, return to the Red Flag Gate, and re-screen before continuing.</div>
   ${nav("Continue assessment at onsite medical")}</div>`;
 }
 
@@ -532,8 +557,8 @@ function scrOrient(){
   <h2 class="step">Cognitive screen</h2>
   <p class="lede">Workplace-adapted orientation questions (Maddocks-style), plus brief concentration tasks. Mark each answer.</p>
   ${ORIENT.map((q,i)=>ynRowOrient(q,i)).join("")}
-  ${ynRow("Months of the year in reverse order — any errors?","December → January, no more than one attempt","cog","monthsErr")}
-  ${ynRow("Digits backward — any errors?","Read 4 digits at 1/sec (e.g., 4-9-3-8); worker repeats in reverse","cog","digitsErr")}
+  ${ynRow("Months of the year in reverse order: any errors?","December → January, no more than one attempt","cog","monthsErr")}
+  ${ynRow("Digits backward: any errors?","Read 4 digits at 1/sec (e.g., 4-9-3-8); worker repeats in reverse","cog","digitsErr")}
   ${nav()}</div>`;
 }
 function ynRowOrient(q,i){
@@ -562,19 +587,19 @@ function scrBess(){
   return `<div class="card">
   <div class="eyebrow">Step · Gait, balance & vestibular screen</div>
   <h2 class="step">Tandem gait + mVOMS</h2>
-  <div class="f"><label>Worker age band — select first to set the max time allocation</label>
+  <div class="f"><label>Worker age band (select first to set the max time allocation)</label>
     <select data-bind="bess.age" onchange="render()"><option value="">Select…</option><option>18–39</option><option>40–54</option><option>55+</option></select></div>
-  ${cap?`<div class="guide"><b>Max time allocation for this age band:</b> single-task ${cap.s} s · dual-task ${cap.d} s. Stop the trial once the allocation is reached and record it as exceeded — the purpose is to determine the direction of medical care, not to extend testing. Times exceeding the allocation flag automatically. Thresholds are provisional pending site baselines.</div>`
+  ${cap?`<div class="guide"><b>Max time allocation for this age band:</b> single-task ${cap.s} s · dual-task ${cap.d} s. Stop the trial once the allocation is reached and record it as exceeded. The purpose is to determine the direction of medical care, not to extend testing. Times exceeding the allocation flag automatically. Thresholds are provisional pending site baselines.</div>`
        :`<div class="guide">Select an age band above to populate the max time allocation before timing any trial.</div>`}
-  <p class="lede">Tandem gait on a 3 m taped line — heel-to-toe out and back, best of up to 4 trials. Compare against the worker's individual baseline where one exists.</p>
+  <p class="lede">Tandem gait on a 3 m taped line: heel-to-toe out and back, best of up to 4 trials. Compare against the worker's individual baseline where one exists.</p>
   <div class="grid2">
-    <div class="f"><label>Single-task tandem gait — best time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.single" onchange="render()">${exS?`<small style="color:var(--signal);font-weight:700">Exceeds ${cap.s} s allocation — flagged</small>`:""}</div>
-    <div class="f"><label>Dual-task tandem gait — time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.dual" onchange="render()"><small style="color:var(--mut)">While subtracting by 7s or reciting months in reverse</small>${exD?`<small style="display:block;color:var(--signal);font-weight:700">Exceeds ${cap.d} s allocation — flagged</small>`:""}</div>
+    <div class="f"><label>Single-task tandem gait: best time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.single" onchange="render()">${exS?`<small style="color:var(--signal);font-weight:700">Exceeds ${cap.s} s allocation, flagged</small>`:""}</div>
+    <div class="f"><label>Dual-task tandem gait: time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.dual" onchange="render()"><small style="color:var(--mut)">While subtracting by 7s or reciting months in reverse</small>${exD?`<small style="display:block;color:var(--signal);font-weight:700">Exceeds ${cap.d} s allocation, flagged</small>`:""}</div>
     <div class="f"><label>Footwear / surface</label><input type="text" data-bind="bess.env" placeholder="e.g., work boots, concrete floor"></div>
   </div>
-  ${ynRow("Eyes-open tandem stance — unable to hold 10 seconds?","Heel-to-toe stance, hands on hips, eyes open (STEADI-style)","bess","stance")}
+  ${ynRow("Eyes-open tandem stance: unable to hold 10 seconds?","Heel-to-toe stance, hands on hips, eyes open (STEADI-style)","bess","stance")}
   ${ynRow("Is gait or stance performance a clinical concern for this worker?","Judge against age band, baseline if available, footwear, and fatigue","bess","concern")}
-  <div class="guide"><b>mVOMS — symptom provocation.</b> Set the worker's pre-test symptom score first (highest of headache, dizziness, nausea, or fogginess, 0–10). After each item, set the post-item score — the item flags <b>POSITIVE automatically</b> when the score rises by 2 or more points. Do not perform if an unstable cervical spine is suspected.</div>
+  <div class="guide"><b>mVOMS: symptom provocation.</b> Set the worker's pre-test symptom score first (highest of headache, dizziness, nausea, or fogginess, 0–10). After each item, set the post-item score; the item flags <b>POSITIVE automatically</b> when the score rises by 2 or more points. Do not perform if an unstable cervical spine is suspected.</div>
   <div class="qrow"><div class="q">Pre-test symptom score (baseline)</div><div class="sub">Worker's rating before any mVOMS item</div>
     <div class="slid"><input type="range" min="0" max="10" step="1" value="${pre}" aria-label="Pre-test symptom score" oninput="document.getElementById('val-pre').textContent=this.value" onchange="S.voms.pre=+this.value;render()"><span class="sval" id="val-pre">${pre}</span><span class="sbad">Baseline</span></div></div>
   ${VOMS.map(([q,s],i)=>vomsRow(q,s,"v"+i)).join("")}
@@ -583,10 +608,10 @@ function scrBess(){
 function vomsRow(label,sub,key){
   const pre=+S.voms.pre||0, v=S.voms[key], set=v!==undefined&&v!==null;
   const pos=set&&(v-pre)>=2;
-  return `<div class="qrow"><div class="q">${label} — post-item score</div><div class="sub">${sub}</div>
+  return `<div class="qrow"><div class="q">${label}: post-item score</div><div class="sub">${sub}</div>
   <div class="slid"><input type="range" min="0" max="10" step="1" value="${set?v:pre}" aria-label="${label} post-item score" oninput="vomsLive('${key}',this.value)" onchange="S.voms['${key}']=+this.value;render()">
   <span class="sval" id="val-${key}">${set?v:pre}</span>
-  <span class="sbad${pos?" pos":""}" id="badge-${key}">${pos?"POSITIVE ≥2":set?"Negative":"—"}</span></div></div>`;
+  <span class="sbad${pos?" pos":""}" id="badge-${key}">${pos?"POSITIVE ≥2":set?"Negative":"Not set"}</span></div></div>`;
 }
 function vomsLive(key,val){
   document.getElementById('val-'+key).textContent=val;
@@ -628,22 +653,161 @@ function scrDecision(){
 }
 
 /* ================= REPORT ================= */
+const NR="Not recorded";
+const blank=v=>v===undefined||v===null||v==="";
 function kv(k,v,posTest){
-  const val=v===undefined||v===null||v===""?"—":v;
-  const cls=posTest===true?"pos":(posTest===false?"neg":"");
-  return `<tr><td>${k}</td><td class="${cls}">${esc(val)}</td></tr>`;
+  const val=blank(v)?NR:v;
+  const cls=blank(v)?"nr":(posTest===true?"pos":(posTest===false?"neg":""));
+  return `<tr><td>${esc(k)}</td><td class="${cls}">${esc(val)}</td></tr>`;
 }
+const ynTxt=(v,yes="Yes",no="No")=>v==="yes"?yes:(v==="no"?no:"");
+const naTxt=(v,norm="Normal",abn="Abnormal / unable")=>v==="norm"?norm:(v==="abn"?abn:"");
+const seen=n=>S.visited.includes(n);
+function sec(title,rows,note){
+  // A skipped step with nothing entered collapses to one explicit row instead of a page of blanks.
+  if((note===SKIP||/^Transition not applicable/.test(note||""))&&!/<td class="(?!nr")[^"]*">(?!Not assessed<|Not applicable<)/.test(rows.replace(/<tr><td>[^<]*<\/td>/g,"")))
+    rows=kv("All items in this step","Not assessed");
+  return `<section class="rsec"><h3>${title}</h3>${note?`<p class="rnote">${note}</p>`:""}<table>${rows}</table></section>`;
+}
+const SKIP="This step was not completed during the assessment (skipped, for example after EMS activation).";
+function fmtStamp(d){return d?new Date(d).toLocaleString([], {year:"numeric",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";}
+const GCS_E={4:"Spontaneous",3:"To voice",2:"To pain",1:"None"};
+const GCS_V={5:"Oriented",4:"Confused",3:"Inappropriate words",2:"Incomprehensible sounds",1:"None"};
+const GCS_M={6:"Obeys commands",5:"Localizes pain",4:"Withdraws from pain",3:"Abnormal flexion",2:"Extension",1:"None"};
+function checklist(list,chosen,stepName,yes,no,emptyLabel,emptyTxt,posWhenChosen){
+  if(!seen(stepName)) return {note:SKIP,rows:list.map(t=>kv(t,"Not assessed")).join("")};
+  const n=list.filter(t=>chosen.includes(t)).length;
+  const rows=list.map(t=>chosen.includes(t)?kv(t,yes,posWhenChosen):kv(t,no,!posWhenChosen)).join("");
+  return {note:"",rows:kv(emptyLabel,n?`${n} of ${list.length}`:emptyTxt,posWhenChosen?n>0:n<list.length)+rows};
+}
+function triggers(){ // mirrors outcome(); lists what drove the decision
+  const t=[];
+  S.redflags.forEach(r=>t.push("Red flag: "+r));
+  const g=gcsTotal();
+  if(g!==null&&g<15)t.push("GCS "+g+" / 15");
+  if(S.vit.pupil==="abn")t.push("Abnormal pupil reflex");
+  if(S.vit.spo2&&+S.vit.spo2<92)t.push("SpO\u2082 "+S.vit.spo2+"%");
+  if(S.signs.length)t.push(S.signs.length+" observable sign(s)");
+  if(S.sympQuick.length)t.push(S.sympQuick.length+" reported symptom(s)");
+  const sc=Object.values(S.symp).filter(v=>v>0).length; if(sc)t.push(sc+" symptom(s) scored above 0");
+  const oi=Object.values(S.orient).filter(v=>v==="no").length; if(oi)t.push(oi+" orientation answer(s) incorrect");
+  const na=Object.values(S.neuro).filter(v=>v==="abn").length; if(na)t.push(na+" neuro / cervical finding(s) abnormal");
+  if(S.cog.monthsErr==="yes")t.push("Months in reverse: errors");
+  if(S.cog.digitsErr==="yes")t.push("Digits backward: errors");
+  if(S.vit.concern==="yes")t.push("Vital signs a clinical concern");
+  if(S.vit.nystag==="abn")t.push("Abnormal eye tracking");
+  if(S.bess.stance==="yes")t.push("Unable to hold tandem stance 10 s");
+  if(S.bess.concern==="yes")t.push("Gait / stance a clinical concern");
+  if(gaitExceeded())t.push("Tandem gait time exceeds age-band allocation");
+  if(vomsPositive())t.push("mVOMS positive (rise of 2 or more)");
+  return t;
+}
+function cssStr(s){return '"'+String(s).replace(/[\\"]/g,"\\$&").replace(/[\n\r]+/g," ")+'"';}
 function scrReport(){
-  const o=outcome(), w=S.worker;
+  const o=outcome(), w=S.worker, clin=S.role==="clinical";
+  const emPath=!!(S.redflags.length||vitalEmergency());
   const gcap=GAIT_CAP[S.bess.age];
   const exS=!!(gcap&&S.bess.single&&+S.bess.single>gcap.s), exD=!!(gcap&&S.bess.dual&&+S.bess.dual>gcap.d);
   const vpre=+S.voms.pre||0;
-  const sympRows=SYMPTOMS.map((t,i)=>S.symp[i]>0?`<tr><td>${t}</td><td class="pos">${S.symp[i]} / 6</td></tr>`:"").join("");
-  const sympTotal=Object.values(S.symp).reduce((a,b)=>a+(+b||0),0);
-  const sympCount=Object.values(S.symp).filter(v=>v>0).length;
-  const orientRows=ORIENT.map((q,i)=>kv(q,S.orient[i]==="yes"?"Correct":(S.orient[i]==="no"?"Incorrect":"—"),S.orient[i]==="no")).join("");
-  const neuroRows=NEURO.map(([q],i)=>kv(q,S.neuro["n"+i]==="norm"?"Normal":(S.neuro["n"+i]==="abn"?"Abnormal":"—"),S.neuro["n"+i]==="abn")).join("");
+  const trig=triggers();
+  const out=[];
+  /* Assessment record */
+  out.push(sec("Assessment record",
+    kv("Tool / version","ICAT v1.1 (Industrial Concussion Assessment Tool)")+
+    kv("Assessment started (device clock)",fmtStamp(S.started))+
+    kv("End time of assessment",w.endTime)+
+    kv("Report generated (device clock)",fmtStamp(new Date()))+
+    kv("Pathway",clin?"Path B: Clinical Assessment":"Path A: First Responder")+
+    kv("Incident / case reference #",S.injrep.ref)));
+  /* Step 1 */
+  out.push(sec("1. Incident and responder",
+    kv("Worker name",w.name)+kv("Badge / employee ID",w.id)+kv("Job role / department",w.job)+kv("Site / building",w.site)+
+    kv("Date of injury",w.date)+kv("Time of injury",w.time)+kv("Assessor name",w.assessor)+kv("Assessor role",w.assessorRole)));
+  /* Step 2 */
+  {const c=checklist(IMMEDIATE.map(x=>x[0]),S.imm,"Immediate Response","Completed","Not confirmed","Actions confirmed","None confirmed",false);
+   out.push(sec("2. Immediate workplace response",c.rows,c.note));}
+  /* Step 3 */
+  {const c=checklist(RED_FLAGS.map(x=>x[0]),S.redflags,"Red Flag Gate","PRESENT","Not present","Red flags present","None reported",true);
+   out.push(sec("3. Red flag gate",c.rows,c.note));}
+  /* Step 4 */
+  out.push(sec("4. Mechanism of injury",
+    kv("Primary mechanism",S.mech.type)+kv("Head protection worn",S.mech.ppe)+kv("Estimated fall height / object detail",S.mech.detail)+
+    kv("Loss of consciousness observed or reported",ynTxt(S.mech.loc),S.mech.loc==="yes")+
+    kv("Memory gap before or after the event",ynTxt(S.mech.amnesia),S.mech.amnesia==="yes")+
+    kv("Description of the incident",S.mech.desc),seen("Mechanism")?"":SKIP));
+  /* Step 5 */
+  {const c=checklist(SIGNS.map(x=>x[0]),S.signs,"Observable Signs","Observed","Not observed","Signs observed","None observed",true);
+   out.push(sec("5. Observable signs",c.rows,c.note));}
+  if(!clin){
+    {const c=checklist(QUICK_SYMP,S.sympQuick,"Reported Symptoms","Reported","Not reported","Symptoms reported","None reported",true);
+     out.push(sec("6. Reported symptoms",c.rows,c.note));}
+    out.push(sec("7. Witness",kv("Witness name",S.witness.name)+kv("Witness role / contact",S.witness.contact)+kv("Witness account",S.witness.account),seen("Witness")?"":SKIP));
+  }else{
+    const g=gcsTotal(), gp=c=>c?c:"";
+    out.push(sec("6. Vitals, GCS and pupils",
+      kv("Heart rate",S.vit.hr!==undefined&&S.vit.hr!==""?S.vit.hr+" bpm":"")+
+      kv("Blood pressure",S.vit.bp?S.vit.bp+" mmHg":"")+
+      kv("Pulse ox (SpO\u2082)",S.vit.spo2?S.vit.spo2+"%"+((+S.vit.spo2<92)?" (CRITICAL, below 92%)":""):"",!!(S.vit.spo2&&+S.vit.spo2<92))+
+      kv("Respiratory rate (optional)",S.vit.rr?S.vit.rr+" breaths/min":"")+
+      kv("Temperature (optional)",S.vit.temp)+
+      kv("GCS eye opening (E)",S.vit.gcsE?S.vit.gcsE+" ("+GCS_E[S.vit.gcsE]+")":"")+
+      kv("GCS verbal response (V)",S.vit.gcsV?S.vit.gcsV+" ("+GCS_V[S.vit.gcsV]+")":"")+
+      kv("GCS motor response (M)",S.vit.gcsM?S.vit.gcsM+" ("+GCS_M[S.vit.gcsM]+")":"")+
+      kv("GCS total",g!==null?g+" / 15"+(g<15?" (CRITICAL, below 15)":""):((S.vit.gcsE||S.vit.gcsV||S.vit.gcsM)?"Incomplete (not all components scored)":""),g!==null?g<15:undefined)+
+      kv("Pupil reflex",naTxt(S.vit.pupil,"Normal: equal, round, reactive","ABNORMAL"),S.vit.pupil==="abn")+
+      kv("Eye tracking",naTxt(S.vit.nystag,"Normal: smooth tracking, no involuntary movement","Abnormal tracking / involuntary movement"),S.vit.nystag==="abn")+
+      kv("Vital signs a clinical concern",ynTxt(S.vit.concern),S.vit.concern==="yes"),seen("Vitals & GCS")?"":SKIP));
+    {let rows="",note="";
+     if(emPath) note="Transition not applicable: EMS pathway activated; the worker remained at the incident location.";
+     else if(!seen("Transition to Onsite Medical")) note=SKIP;
+     if(seen("Transition to Onsite Medical")&&!emPath){const c=checklist(TRANSIT.map(x=>x[0]),S.transChk,"Transition to Onsite Medical","Completed","Not confirmed","Transit actions confirmed","None confirmed",false);rows+=c.rows;}
+     else rows+=TRANSIT.map(([t])=>kv(t,S.transChk.includes(t)?"Completed":(emPath?"Not applicable":"Not assessed"))).join("");
+     rows+=kv("Escorted by (name / role)",S.trans.escort)+kv("Transport mode",S.trans.mode)+kv("Departure from location",S.trans.depart)+kv("Arrival at onsite medical",S.trans.arrive);
+     out.push(sec("7. Transition to onsite medical",rows,note));}
+    {const scored=SYMPTOMS.filter((t,i)=>S.symp[i]!==undefined&&S.symp[i]!==null).length;
+     const total=Object.values(S.symp).reduce((a,b)=>a+(+b||0),0);
+     const cnt=Object.values(S.symp).filter(v=>v>0).length;
+     const rows=kv("Summary",scored?`${cnt} of 22 symptoms present; severity ${total} / 132 (${scored} of 22 items rated)`:"",cnt>0)+
+       SYMPTOMS.map((t,i)=>{const v=S.symp[i];return blank(v)?kv(t,""):kv(t,v+" / 6"+(v===0?" (none)":""),v>0);}).join("")+
+       kv("Worse with physical activity",ynTxt(S.sympMods.phys),S.sympMods.phys==="yes")+
+       kv("Worse with mental activity or screens",ynTxt(S.sympMods.ment),S.sympMods.ment==="yes")+
+       kv("Percent of normal the worker feels",blank(S.sympMods.pct)?"":S.sympMods.pct+"%");
+     out.push(sec("8. Symptom inventory (0 to 6 severity)",rows,seen("Symptom Inventory")?"":SKIP));}
+    {const ans=ORIENT.filter((q,i)=>S.orient[i]).length, ok=ORIENT.filter((q,i)=>S.orient[i]==="yes").length;
+     const rows=kv("Orientation score",ans?`${ok} of ${ORIENT.length} correct (${ans} answered)`:"",ans?ok<ans:undefined)+
+       ORIENT.map((q,i)=>kv(q,S.orient[i]==="yes"?"Correct":(S.orient[i]==="no"?"Incorrect":""),S.orient[i]==="no")).join("")+
+       kv("Months of the year in reverse: errors",ynTxt(S.cog.monthsErr,"Yes, errors","No errors"),S.cog.monthsErr==="yes")+
+       kv("Digits backward: errors",ynTxt(S.cog.digitsErr,"Yes, errors","No errors"),S.cog.digitsErr==="yes");
+     out.push(sec("9. Orientation and cognition",rows,seen("Orientation & Cognition")?"":SKIP));}
+    out.push(sec("10. Neurological and cervical screen",NEURO.map(([q],i)=>kv(q,naTxt(S.neuro["n"+i]),S.neuro["n"+i]==="abn")).join(""),seen("Neuro & Cervical")?"":SKIP));
+    {const preSet=!blank(S.voms.pre);
+     const rows=kv("Worker age band / max time allocation",S.bess.age?S.bess.age+(gcap?": "+gcap.s+" s single-task, "+gcap.d+" s dual-task":""):"")+
+       kv("Single-task tandem gait, best time",blank(S.bess.single)?"":S.bess.single+" s"+(exS?" (EXCEEDS ALLOCATION)":gcap?" (within allocation)":""),exS)+
+       kv("Dual-task tandem gait, time",blank(S.bess.dual)?"":S.bess.dual+" s"+(exD?" (EXCEEDS ALLOCATION)":gcap?" (within allocation)":""),exD)+
+       kv("Footwear / surface",S.bess.env)+
+       kv("Eyes-open tandem stance, 10 s",ynTxt(S.bess.stance,"Unable to hold","Held 10 s"),S.bess.stance==="yes")+
+       kv("Gait / stance a clinical concern",ynTxt(S.bess.concern),S.bess.concern==="yes")+
+       kv("mVOMS pre-test symptom score",preSet?S.voms.pre+" / 10":"")+
+       VOMS.map(([q],i)=>{const v=S.voms["v"+i];const set=!blank(v);const pos=set&&(v-vpre)>=2;
+         return kv("mVOMS "+q+" (pre to post)",set?vpre+" \u2192 "+v+" / 10"+(pos?": POSITIVE (rise of 2 or more)":": negative")+(preSet?"":" (pre-test not set, 0 assumed)"):"",set?pos:undefined);}).join("");
+     out.push(sec("11. Gait, balance and vestibular (tandem gait + mVOMS)",rows,seen("Gait & Vestibular")?"":SKIP));}
+  }
+  const n0=clin?12:8;
+  out.push(sec(n0+". Escalation decision",
+    kv("Recommended action",o.title,o.lvl==="ok"?false:true)+
+    kv("Findings driving the decision",trig.length?trig.join("; "):"None: no red flags, signs, or symptoms identified")+
+    kv("End time of assessment",w.endTime)));
+  out.push(sec("Emergency response timeline",
+    kv("EMS activation time",S.ems.activated)+kv("EMS arrival time",S.ems.arrival)+kv("EMS departure time",S.ems.departure)+kv("Leadership notification time",S.ems.leader),
+    "Times are left blank (Not recorded) when EMS was not activated."));
+  out.push(sec("Injury reporting",
+    kv("Injury reported per organizational policy",S.injrep.called?"Yes":"No (not confirmed)",!S.injrep.called)+
+    kv("Time reported",S.injrep.time)+kv("Incident / case reference #",S.injrep.ref)));
+  if(clin) out.push(sec("Disposition",kv("Clinical disposition",S.disp)+kv("Return-to-work note",S.rtw)));
+  out.push(`<section class="rsec"><h3>Assessor notes</h3><p class="rtext${S.notes?"":" nr"}">${esc(S.notes)||NR}</p></section>`);
+  const runHead=`ICAT v1.1 | Worker: ${w.name||NR}${w.id?" (ID "+w.id+")":""} | Date of injury: ${w.date||NR}`;
   return `<div class="card rep">
+  <style>@page{@top-left{content:${cssStr(runHead)}}}</style>
   <div class="noprint">
     <div class="eyebrow">Final step · Documentation</div>
     <h2 class="step">Assessment report</h2>
@@ -652,82 +816,22 @@ function scrReport(){
     <button class="btn ghost" onclick="go(-1)">Back</button></div>
     ${signupCard()}
   </div>
-  <div class="printonly printhead" style="align-items:center;gap:12px;margin-bottom:6px">
-    <div class="mark" style="border-color:var(--amber)"><span>IC</span></div>
-    <div><div style="font-family:var(--disp);font-weight:800;font-size:20px">ICAT — INDUSTRIAL CONCUSSION ASSESSMENT TOOL</div>
-    <div style="font-size:11px;color:var(--mut)">Occupational head-injury assessment record · v1.1 · Generated ${new Date().toLocaleString()}</div></div>
+  <div class="printonly printhead">
+    <img src="ici-logo-navy.png" alt="Industrial Concussion Institute" width="52" height="52">
+    <div><div class="ph-title">ICAT: Industrial Concussion Assessment Tool</div>
+    <div class="ph-sub">Occupational head-injury assessment record · ICAT v1.1 · Industrial Concussion Institute · Generated ${esc(fmtStamp(new Date()))}</div></div>
   </div>
-  <h3>Outcome</h3>
+  <section class="rsec"><h3>Outcome</h3>
   <p style="margin:6px 0"><span class="${o.badge}">${o.lvl==="em"?"EMERGENCY":o.lvl==="warn"?"Remove From Duty":"Monitor"}</span></p>
-  <p style="font-size:13px"><b>${o.title}.</b> ${o.body}</p>
-  <h3>Incident</h3><table>
-  ${kv("Worker",`${w.name||"—"} · ID ${w.id||"—"}`)}${kv("Job role / dept",w.job)}${kv("Site",w.site)}
-  ${kv("Date / time of injury",`${w.date||"—"} ${w.time||""}`)}
-  ${kv("End time of assessment",w.endTime)}
-  ${kv("Assessor",`${w.assessor||"—"} (${w.assessorRole||"—"})`)}
-  ${kv("Pathway",S.role==="clinical"?"Path B — Clinical Assessment":"Path A — First Responder")}</table>
-  <h3>Immediate response</h3><table>${IMMEDIATE.map(([t])=>kv(t,S.imm.includes(t)?"Completed":"Not confirmed",!S.imm.includes(t))).join("")}</table>
-  <h3>Red flags</h3><table>${S.redflags.length?S.redflags.map(t=>kv(t,"PRESENT",true)).join(""):kv("All red flags","None identified",false)}</table>
-  <h3>Mechanism of injury</h3><table>
-  ${kv("Mechanism",S.mech.type)}${kv("Head protection",S.mech.ppe)}${kv("Detail",S.mech.detail)}
-  ${kv("Loss of consciousness",S.mech.loc==="yes"?"Yes":S.mech.loc==="no"?"No":"—",S.mech.loc==="yes")}
-  ${kv("Memory gap",S.mech.amnesia==="yes"?"Yes":S.mech.amnesia==="no"?"No":"—",S.mech.amnesia==="yes")}
-  ${kv("Description",S.mech.desc)}</table>
-  <h3>Observable signs</h3><table>${S.signs.length?S.signs.map(t=>kv(t,"Observed",true)).join(""):kv("Observable signs","None observed",false)}</table>
-  ${S.role==="responder"?`
-    <h3>Reported symptoms</h3><table>${S.sympQuick.length?S.sympQuick.map(t=>kv(t,"Reported",true)).join(""):kv("Reported symptoms","None reported",false)}</table>
-    <h3>Witness</h3><table>${kv("Witness",`${S.witness.name||"—"} · ${S.witness.contact||"—"}`)}${kv("Account",S.witness.account)}</table>`
-  :`
-    <h3>Vitals, GCS & pupils</h3><table>
-    ${kv("Heart rate",S.vit.hr?S.vit.hr+" bpm":"—")}
-    ${kv("Blood pressure",S.vit.bp)}
-    ${kv("Respiratory rate",S.vit.rr?S.vit.rr+" /min":"—")}
-    ${kv("SpO\u2082 (pulse ox)",S.vit.spo2?S.vit.spo2+" %"+((+S.vit.spo2<92)?" — CRITICAL":""):"—",!!(S.vit.spo2&&+S.vit.spo2<92))}
-    ${kv("Temperature",S.vit.temp)}
-    ${kv("GCS (E / V / M)",gcsTotal()!==null?S.vit.gcsE+" / "+S.vit.gcsV+" / "+S.vit.gcsM+" — total "+gcsTotal()+" / 15"+(gcsTotal()<15?" — CRITICAL":""):"—",gcsTotal()!==null&&gcsTotal()<15)}
-    ${kv("Pupil reflex",S.vit.pupil==="norm"?"Normal — equal, round, reactive":S.vit.pupil==="abn"?"ABNORMAL":"—",S.vit.pupil==="abn")}
-    ${kv("Eye tracking",S.vit.nystag==="norm"?"Smooth tracking, no involuntary movement":S.vit.nystag==="abn"?"Abnormal tracking / involuntary movement":"—",S.vit.nystag==="abn")}
-    ${kv("Vitals a clinical concern",S.vit.concern==="yes"?"Yes":S.vit.concern==="no"?"No":"—",S.vit.concern==="yes")}</table>
-    <h3>Transition to onsite medical</h3>
-    ${(S.redflags.length||vitalEmergency())?`<table>${kv("Transition","Not applicable — EMS pathway activated; worker remained at location")}</table>`
-    :`<table>${TRANSIT.map(([t])=>kv(t,S.transChk.includes(t)?"Completed":"Not confirmed",!S.transChk.includes(t))).join("")}
-    ${kv("Escorted by",S.trans.escort)}${kv("Transport mode",S.trans.mode)}
-    ${kv("Departure from location",S.trans.depart)}${kv("Arrival at onsite medical",S.trans.arrive)}</table>`}
-    <h3>Symptom inventory</h3><table>${sympRows||kv("Symptoms","All rated 0",false)}
-    <tr><td><b>Total</b></td><td><b>${sympCount} symptoms · severity ${sympTotal} / 132</b></td></tr>
-    ${kv("Worse with physical activity",S.sympMods.phys==="yes"?"Yes":S.sympMods.phys==="no"?"No":"—",S.sympMods.phys==="yes")}
-    ${kv("Worse with mental activity",S.sympMods.ment==="yes"?"Yes":S.sympMods.ment==="no"?"No":"—",S.sympMods.ment==="yes")}
-    ${kv("Percent of normal",S.sympMods.pct?S.sympMods.pct+"%":"—")}</table>
-    <h3>Orientation & cognition</h3><table>${orientRows}
-    ${kv("Months in reverse — errors",S.cog.monthsErr==="yes"?"Yes":S.cog.monthsErr==="no"?"No":"—",S.cog.monthsErr==="yes")}
-    ${kv("Digits backward — errors",S.cog.digitsErr==="yes"?"Yes":S.cog.digitsErr==="no"?"No":"—",S.cog.digitsErr==="yes")}</table>
-    <h3>Neurological & cervical screen</h3><table>${neuroRows}</table>
-    <h3>Gait, balance & vestibular (tandem gait + mVOMS)</h3><table>
-    ${kv("Age band / max allocation",S.bess.age?S.bess.age+(gcap?" — "+gcap.s+" s single / "+gcap.d+" s dual":""):"—")}
-    ${kv("Single-task tandem gait",S.bess.single?S.bess.single+" s"+(exS?" — EXCEEDS ALLOCATION":""):"—",exS)}
-    ${kv("Dual-task tandem gait",S.bess.dual?S.bess.dual+" s"+(exD?" — EXCEEDS ALLOCATION":""):"—",exD)}
-    ${kv("Eyes-open tandem stance (10 s)",S.bess.stance==="yes"?"Unable to hold":S.bess.stance==="no"?"Held":"—",S.bess.stance==="yes")}
-    ${kv("Footwear / surface",S.bess.env)}
-    ${kv("Clinical concern (gait/stance)",S.bess.concern==="yes"?"Yes":S.bess.concern==="no"?"No":"—",S.bess.concern==="yes")}
-    ${kv("mVOMS pre-test symptom score",S.voms.pre!==undefined&&S.voms.pre!==null?S.voms.pre+" / 10":"—")}
-    ${VOMS.map(([q],i)=>{const v=S.voms["v"+i];const set=v!==undefined&&v!==null;const pos=set&&(v-vpre)>=2;return kv("mVOMS: "+q,set?vpre+" \u2192 "+v+" / 10"+(pos?" — POSITIVE (\u22652 rise)":" — negative"):"—",pos);}).join("")}</table>
-    <h3>Disposition</h3><table>${kv("Clinical disposition",S.disp)}${kv("Return-to-work note",S.rtw)}</table>`}
-  <h3>Emergency response timeline</h3><table>
-  ${kv("EMS activation time",S.ems.activated)}
-  ${kv("EMS arrival time",S.ems.arrival)}
-  ${kv("EMS departure time",S.ems.departure)}
-  ${kv("Leadership notification time",S.ems.leader)}</table>
-  <h3>Injury reporting (organizational policy)</h3><table>
-  ${kv("Injury reported per organizational policy",S.injrep.called?"Yes":"NOT RECORDED",!S.injrep.called)}
-  ${kv("Time reported",S.injrep.time)}
-  ${kv("Incident / case reference #",S.injrep.ref)}</table>
-  <h3>Notes</h3><p style="font-size:13px">${esc(S.notes)||"—"}</p>
-  <div>
-    <span class="sigline">Assessor signature · date</span>
-    <span class="sigline">Worker signature · date</span>
-  </div>
-  <p class="legal">ICAT is an evidence-informed occupational concussion framework. It is <b>not a diagnostic instrument</b> and does not replace licensed medical evaluation, clinical judgment, employer policy, or applicable regulations. Where conflicts exist, organizational policy and regulation take precedence. ICAT is worker-first: it must never be used to minimize symptoms, pressure a worker to remain at work, or prioritize productivity over health and safety. Handle this record per your organization's medical-privacy requirements.</p>
-  <p class="legal" style="margin-top:6px;border-top:none;padding-top:0">© Industrial Concussion Institute LLC</p>
+  <p style="font-size:13px"><b>${o.title}.</b> ${o.body}</p></section>
+  ${out.join("\n  ")}
+  <section class="rsec sigblock"><h3>Signatures</h3>
+    <div class="sigrow"><span class="sigline wide">Assessor printed name${w.assessor?": "+esc(w.assessor):""}</span><span class="sigline">Assessor role${w.assessorRole?": "+esc(w.assessorRole):""}</span></div>
+    <div class="sigrow"><span class="sigline wide">Assessor signature</span><span class="sigline">Date / time</span></div>
+    <div class="sigrow"><span class="sigline wide">Worker signature</span><span class="sigline">Date / time</span></div>
+  </section>
+  <section class="rsec"><p class="legal">ICAT is an evidence-informed occupational concussion framework. It is <b>not a diagnostic instrument</b> and does not replace licensed medical evaluation, clinical judgment, employer policy, or applicable regulations. Where conflicts exist, organizational policy and regulation take precedence. ICAT is worker-first: it must never be used to minimize symptoms, pressure a worker to remain at work, or prioritize productivity over health and safety. Handle this record per your organization's medical-privacy requirements. This report was generated on the assessor's device; no assessment data is transmitted or stored by ICAT.</p>
+  <p class="legal" style="margin-top:6px;border-top:none;padding-top:0"><b>Educational use only. Not a diagnostic instrument.</b> ICAT v1.1 · © 2026 Industrial Concussion Institute LLC</p></section>
   <div class="nav noprint"><button class="btn ghost" onclick="location.reload()">Start new assessment</button></div>
   </div>`;
 }
