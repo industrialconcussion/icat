@@ -144,7 +144,7 @@ h2.step{font-family:var(--disp);font-weight:800;font-size:27px;line-height:1.1;m
   body{background:#fff;font-size:12px}
   header.app,.rail,.nav,.noprint{display:none!important}
   .card{border:none;padding:0;margin-top:0}
-  .printonly{display:block}
+  .printonly{display:block} .printonly.printhead{display:flex}
   .wrap{max-width:100%;padding:0}
   .rep h3{font-size:14px}
 }
@@ -652,7 +652,7 @@ function scrReport(){
     <button class="btn ghost" onclick="go(-1)">Back</button></div>
     ${signupCard()}
   </div>
-  <div class="printonly" style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+  <div class="printonly printhead" style="align-items:center;gap:12px;margin-bottom:6px">
     <div class="mark" style="border-color:var(--amber)"><span>IC</span></div>
     <div><div style="font-family:var(--disp);font-weight:800;font-size:20px">ICAT — INDUSTRIAL CONCUSSION ASSESSMENT TOOL</div>
     <div style="font-size:11px;color:var(--mut)">Occupational head-injury assessment record · v1.1 · Generated ${new Date().toLocaleString()}</div></div>
