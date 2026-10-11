@@ -347,9 +347,36 @@ function render(){
     "Witness":scrWitness,"Vitals & GCS":scrVitals,"Transition to Onsite Medical":scrTrans,"Symptom Inventory":scrSymp,"Orientation & Cognition":scrOrient,
     "Neuro & Cervical":scrNeuro,"Gait & Vestibular":scrBess,"Decision":scrDecision,"Report":scrReport
   }[name];
+  // Preserve focus and caret across a same-screen re-render so no keystroke lands in a removed element.
+  const same=name===lastScreen, a=document.activeElement, fk=(same&&a&&app.contains(a))?focusKey(a):null;
+  let sel=null; try{if(fk&&a.selectionStart!=null)sel=[a.selectionStart,a.selectionEnd];}catch(e){}
   app.innerHTML=fn();
   bindInputs();
+  lastScreen=name;
+  if(fk){
+    const t=[...app.querySelectorAll("input,select,textarea,button")].find(el=>focusKey(el)===fk);
+    if(t){t.focus({preventScroll:true});if(sel){try{t.setSelectionRange(sel[0],sel[1]);}catch(e){}}}
+  }
 }
+let lastScreen=null, rerenderQueued=false;
+function focusKey(el){
+  const g=k=>el.getAttribute(k);
+  return g("data-bind")?"b:"+g("data-bind"):el.hasAttribute("data-note")?"note":el.id?"id:"+el.id:
+    g("aria-label")?"l:"+g("aria-label"):g("onclick")?"c:"+g("onclick"):g("onchange")?"h:"+g("onchange"):null;
+}
+// Change-triggered re-renders are deferred until after the browser has moved focus to the next
+// field the user clicked or tabbed into; render() then restores that focus. State is always
+// written on input (bindInputs), so the re-render reads back every typed value.
+// If a pointer is down (the user is mid-click on another control), wait for pointerup so the click
+// still lands on the original element; a short fallback covers native select popups.
+let ptrDown=false, rerenderTimer=null;
+function flushRerender(){if(!rerenderQueued)return;rerenderQueued=false;clearTimeout(rerenderTimer);render();}
+function rerender(){
+  if(rerenderQueued)return;rerenderQueued=true;
+  rerenderTimer=setTimeout(flushRerender,ptrDown?600:0);
+}
+document.addEventListener("pointerdown",()=>{ptrDown=true;},true);
+["pointerup","pointercancel"].forEach(t=>document.addEventListener(t,()=>{ptrDown=false;if(rerenderQueued){clearTimeout(rerenderTimer);rerenderTimer=setTimeout(flushRerender,0);}},true));
 
 function scrIncident(){
   return `<div class="card">
@@ -471,23 +498,23 @@ function scrVitals(){
   <div class="grid2">
     <div class="f"><label>Heart rate (bpm)</label><input type="number" min="0" data-bind="vit.hr"></div>
     <div class="f"><label>Blood pressure (mmHg)</label><input type="text" data-bind="vit.bp" placeholder="e.g., 128/82"></div>
-    <div class="f"><label>Pulse ox: SpO\u2082 (%)</label><input type="number" min="0" max="100" data-bind="vit.spo2" onchange="render()">${spoCrit?`<small style="color:var(--signal);font-weight:700">Below 92%: critical finding</small>`:""}</div>
+    <div class="f"><label>Pulse ox: SpO\u2082 (%)</label><input type="number" min="0" max="100" data-bind="vit.spo2" onchange="rerender()">${spoCrit?`<small style="color:var(--signal);font-weight:700">Below 92%: critical finding</small>`:""}</div>
     <div class="f"><label>Respiratory rate (breaths/min), optional</label><input type="number" min="0" data-bind="vit.rr"></div>
     <div class="f"><label>Temperature, optional</label><input type="text" data-bind="vit.temp" placeholder="e.g., 98.6 °F"></div>
   </div>
   <div class="guide"><b>Glasgow Coma Scale.</b> Select each response; the total calculates automatically. Any score below 15 is an emergency escalation.</div>
   <div class="grid2">
     <div class="f"><label>Eye opening (E)</label>
-      <select data-bind="vit.gcsE" onchange="render()"><option value="">Select…</option>
+      <select data-bind="vit.gcsE" onchange="rerender()"><option value="">Select…</option>
         <option value="4">4: Spontaneous</option><option value="3">3: To voice</option>
         <option value="2">2: To pain</option><option value="1">1: None</option></select></div>
     <div class="f"><label>Verbal response (V)</label>
-      <select data-bind="vit.gcsV" onchange="render()"><option value="">Select…</option>
+      <select data-bind="vit.gcsV" onchange="rerender()"><option value="">Select…</option>
         <option value="5">5: Oriented</option><option value="4">4: Confused</option>
         <option value="3">3: Inappropriate words</option><option value="2">2: Incomprehensible sounds</option>
         <option value="1">1: None</option></select></div>
     <div class="f"><label>Motor response (M)</label>
-      <select data-bind="vit.gcsM" onchange="render()"><option value="">Select…</option>
+      <select data-bind="vit.gcsM" onchange="rerender()"><option value="">Select…</option>
         <option value="6">6: Obeys commands</option><option value="5">5: Localizes pain</option>
         <option value="4">4: Withdraws from pain</option><option value="3">3: Abnormal flexion</option>
         <option value="2">2: Extension</option><option value="1">1: None</option></select></div>
@@ -588,20 +615,20 @@ function scrBess(){
   <div class="eyebrow">Step · Gait, balance & vestibular screen</div>
   <h2 class="step">Tandem gait + mVOMS</h2>
   <div class="f"><label>Worker age band (select first to set the max time allocation)</label>
-    <select data-bind="bess.age" onchange="render()"><option value="">Select…</option><option>18–39</option><option>40–54</option><option>55+</option></select></div>
+    <select data-bind="bess.age" onchange="rerender()"><option value="">Select…</option><option>18–39</option><option>40–54</option><option>55+</option></select></div>
   ${cap?`<div class="guide"><b>Max time allocation for this age band:</b> single-task ${cap.s} s · dual-task ${cap.d} s. Stop the trial once the allocation is reached and record it as exceeded. The purpose is to determine the direction of medical care, not to extend testing. Times exceeding the allocation flag automatically. Thresholds are provisional pending site baselines.</div>`
        :`<div class="guide">Select an age band above to populate the max time allocation before timing any trial.</div>`}
   <p class="lede">Tandem gait on a 3 m taped line: heel-to-toe out and back, best of up to 4 trials. Compare against the worker's individual baseline where one exists.</p>
   <div class="grid2">
-    <div class="f"><label>Single-task tandem gait: best time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.single" onchange="render()">${exS?`<small style="color:var(--signal);font-weight:700">Exceeds ${cap.s} s allocation, flagged</small>`:""}</div>
-    <div class="f"><label>Dual-task tandem gait: time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.dual" onchange="render()"><small style="color:var(--mut)">While subtracting by 7s or reciting months in reverse</small>${exD?`<small style="display:block;color:var(--signal);font-weight:700">Exceeds ${cap.d} s allocation, flagged</small>`:""}</div>
+    <div class="f"><label>Single-task tandem gait: best time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.single" onchange="rerender()">${exS?`<small style="color:var(--signal);font-weight:700">Exceeds ${cap.s} s allocation, flagged</small>`:""}</div>
+    <div class="f"><label>Dual-task tandem gait: time (s)</label><input type="number" min="0" step="0.1" data-bind="bess.dual" onchange="rerender()"><small style="color:var(--mut)">While subtracting by 7s or reciting months in reverse</small>${exD?`<small style="display:block;color:var(--signal);font-weight:700">Exceeds ${cap.d} s allocation, flagged</small>`:""}</div>
     <div class="f"><label>Footwear / surface</label><input type="text" data-bind="bess.env" placeholder="e.g., work boots, concrete floor"></div>
   </div>
   ${ynRow("Eyes-open tandem stance: unable to hold 10 seconds?","Heel-to-toe stance, hands on hips, eyes open (STEADI-style)","bess","stance")}
   ${ynRow("Is gait or stance performance a clinical concern for this worker?","Judge against age band, baseline if available, footwear, and fatigue","bess","concern")}
   <div class="guide"><b>mVOMS: symptom provocation.</b> Set the worker's pre-test symptom score first (highest of headache, dizziness, nausea, or fogginess, 0–10). After each item, set the post-item score; the item flags <b>POSITIVE automatically</b> when the score rises by 2 or more points. Do not perform if an unstable cervical spine is suspected.</div>
   <div class="qrow"><div class="q">Pre-test symptom score (baseline)</div><div class="sub">Worker's rating before any mVOMS item</div>
-    <div class="slid"><input type="range" min="0" max="10" step="1" value="${pre}" aria-label="Pre-test symptom score" oninput="document.getElementById('val-pre').textContent=this.value" onchange="S.voms.pre=+this.value;render()"><span class="sval" id="val-pre">${pre}</span><span class="sbad">Baseline</span></div></div>
+    <div class="slid"><input type="range" min="0" max="10" step="1" value="${pre}" aria-label="Pre-test symptom score" oninput="document.getElementById('val-pre').textContent=this.value" onchange="S.voms.pre=+this.value;rerender()"><span class="sval" id="val-pre">${pre}</span><span class="sbad">Baseline</span></div></div>
   ${VOMS.map(([q,s],i)=>vomsRow(q,s,"v"+i)).join("")}
   ${nav()}</div>`;
 }
@@ -609,7 +636,7 @@ function vomsRow(label,sub,key){
   const pre=+S.voms.pre||0, v=S.voms[key], set=v!==undefined&&v!==null;
   const pos=set&&(v-pre)>=2;
   return `<div class="qrow"><div class="q">${label}: post-item score</div><div class="sub">${sub}</div>
-  <div class="slid"><input type="range" min="0" max="10" step="1" value="${set?v:pre}" aria-label="${label} post-item score" oninput="vomsLive('${key}',this.value)" onchange="S.voms['${key}']=+this.value;render()">
+  <div class="slid"><input type="range" min="0" max="10" step="1" value="${set?v:pre}" aria-label="${label} post-item score" oninput="vomsLive('${key}',this.value)" onchange="S.voms['${key}']=+this.value;rerender()">
   <span class="sval" id="val-${key}">${set?v:pre}</span>
   <span class="sbad${pos?" pos":""}" id="badge-${key}">${pos?"POSITIVE ≥2":set?"Negative":"Not set"}</span></div></div>`;
 }
@@ -634,7 +661,7 @@ function scrDecision(){
     <div class="f"><label>Leadership notification time</label><input type="time" data-bind="ems.leader"></div>
   </div>
   <div class="guide"><b>OSHA recordkeeping: injury reporting.</b> Report every suspected head injury through your organization's injury-reporting process, including cases with no findings. Under OSHA's recordkeeping rule (29 CFR 1904), a work-related injury must go on the OSHA 300 Log if it involves loss of consciousness, days away from work, restricted work or a job transfer, or medical treatment beyond first aid. Record it within 7 calendar days of learning about it. An in-patient hospitalization must also be reported to OSHA within 24 hours. A completed ICAT report can support your OSHA 301 incident record and be shared with your injury-management contact or the treating medical provider, so they get a full picture of the incident and the worker's current state. Final recordability decisions rest with your organization's recordkeeper.</div>
-  <label class="chk"><input type="checkbox" ${S.injrep.called?"checked":""} onchange="S.injrep.called=!S.injrep.called;render()"><span><b>Injury reported per organizational policy</b><small>Required for all outcomes, including no findings</small></span></label>
+  <label class="chk"><input type="checkbox" ${S.injrep.called?"checked":""} onchange="S.injrep.called=!S.injrep.called;rerender()"><span><b>Injury reported per organizational policy</b><small>Required for all outcomes, including no findings</small></span></label>
   <div class="grid2">
     <div class="f"><label>Time reported</label><input type="time" data-bind="injrep.time"></div>
     <div class="f"><label>Incident / case reference #</label><input type="text" data-bind="injrep.ref"></div>
@@ -898,9 +925,9 @@ render();
 </script>
 
 <footer class="app-footer" style="margin:32px auto 16px; max-width:960px; padding:12px 16px; text-align:center; font-size:12px; line-height:1.5; color:#666;">
-  © 2026 Industrial Concussion Institute LLC. App code released under the MIT License.
-  ICAT™ (trademark application pending). Not a diagnostic instrument.
   Educational use only. Not a diagnostic instrument.
+  © 2026 Industrial Concussion Institute LLC. App code released under the MIT License.
+  ICAT™ (trademark application pending).
 </footer>
 </body>
 </html>
