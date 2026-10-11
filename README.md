@@ -12,6 +12,10 @@ A free, single-file web app for recognizing and documenting suspected concussion
 
 To run it offline, download `index.html` and open it in any modern browser.
 
+## Privacy
+- The app stores no assessment data. Worker and assessment details are never sent anywhere; they stay in your browser session, and the PDF is generated on your device.
+- The report screen includes an optional "Stay connected with ICI" form. If you choose to submit it, only the contact details you enter (name, email, and optional organization and role, plus a timestamp and the app version) are sent to the Industrial Concussion Institute via [FormSubmit](https://formsubmit.co). No assessment data is included.
+
 ## Important
 ICAT is not a diagnostic instrument. It does not replace licensed medical evaluation, clinical judgment, your organization's policies, or applicable regulations. Educational use only; not medical advice.
 

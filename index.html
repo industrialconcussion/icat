@@ -47,7 +47,7 @@ h2.step{font-family:var(--disp);font-weight:800;font-size:27px;line-height:1.1;m
 @media(max-width:560px){.grid2{grid-template-columns:1fr}}
 .f{margin-top:12px}
 .f label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}
-.f input[type=text],.f input[type=date],.f input[type=time],.f input[type=number],.f select,.f textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}
+.f input[type=text],.f input[type=email],.f input[type=date],.f input[type=time],.f input[type=number],.f select,.f textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:4px;font:inherit;font-size:14px;background:#fff;color:var(--ink)}
 .f textarea{min-height:74px;resize:vertical}
 .f input:focus,.f select:focus,.f textarea:focus,button:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 /* checklist rows */
@@ -127,6 +127,17 @@ h2.step{font-family:var(--disp);font-weight:800;font-size:27px;line-height:1.1;m
 .badge-em{display:inline-block;background:var(--signal);color:#fff;font-weight:800;font-family:var(--disp);padding:3px 10px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase}
 .badge-warn{display:inline-block;background:var(--amber);color:#fff;font-weight:800;font-family:var(--disp);padding:3px 10px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase}
 .badge-ok{display:inline-block;background:var(--green);color:#fff;font-weight:800;font-family:var(--disp);padding:3px 10px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase}
+/* optional contact sign-up (report screen, never printed) */
+.signup{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:6px;padding:16px;margin-top:18px}
+.signup h3.su{font-family:var(--disp);font-weight:800;font-size:17px;text-transform:uppercase;letter-spacing:.03em;border:none;padding:0;margin:0 0 4px}
+.signup p.sutext{font-size:13.5px;color:#33424E}
+.signup .f label .opt{font-weight:400;color:var(--mut)}
+.signup .chk{margin-top:12px}
+.signup .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.signup .nav{margin-top:14px}
+.sumsg{margin-top:10px;font-size:13.5px;font-weight:600}
+.sumsg.ok{color:var(--green)}
+.sumsg.err{color:var(--signal)}
 /* print */
 .printonly{display:none}
 @media print{
@@ -639,6 +650,7 @@ function scrReport(){
     <p class="lede">Review, then save as PDF. Use your device's print dialog and choose "Save as PDF." Keep the report on file and/or provide it to the organization's injury-management contact or treating medical providers so they have a full picture of the incident and the worker's current state.</p>
     <div class="nav"><button class="btn pri" onclick="window.print()">Save as PDF / Print</button>
     <button class="btn ghost" onclick="go(-1)">Back</button></div>
+    ${signupCard()}
   </div>
   <div class="printonly" style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
     <div class="mark" style="border-color:var(--amber)"><span>IC</span></div>
@@ -718,6 +730,64 @@ function scrReport(){
   <p class="legal" style="margin-top:6px;border-top:none;padding-top:0">© Industrial Concussion Institute LLC</p>
   <div class="nav noprint"><button class="btn ghost" onclick="location.reload()">Start new assessment</button></div>
   </div>`;
+}
+
+/* ================= OPTIONAL CONTACT SIGN-UP =================
+   Sends ONLY the contact fields below to ICI via FormSubmit.
+   No assessment or worker data (S) is ever read or sent here. */
+const SIGNUP_URL="https://formsubmit.co/ajax/info@industrialconcussion.org";
+const CT={name:"",email:"",org:"",role:"",agree:false,status:"",msg:""};
+function signupCard(){
+  const v=k=>esc(CT[k]);
+  return `<section class="signup" aria-labelledby="su-h">
+  <h3 class="su" id="su-h">Stay connected with ICI (optional)</h3>
+  <p class="sutext">Want updates on ICAT, training and new research? Leave your name and email and Sheldon may reach out to connect. This is completely voluntary. Your assessment report is never sent or stored; it stays on your device, and you can save the PDF either way.</p>
+  <form id="suForm" onsubmit="return signupSubmit(event)" novalidate>
+    <div class="grid2">
+      <div class="f"><label for="su-name">Name</label><input type="text" id="su-name" name="name" autocomplete="name" required value="${v("name")}" oninput="CT.name=this.value"></div>
+      <div class="f"><label for="su-email">Email</label><input type="email" id="su-email" name="email" autocomplete="email" inputmode="email" required value="${v("email")}" oninput="CT.email=this.value"></div>
+      <div class="f"><label for="su-org">Organization <span class="opt">(optional)</span></label><input type="text" id="su-org" name="organization" autocomplete="organization" value="${v("org")}" oninput="CT.org=this.value"></div>
+      <div class="f"><label for="su-role">Role <span class="opt">(optional)</span></label><input type="text" id="su-role" name="role" autocomplete="organization-title" value="${v("role")}" oninput="CT.role=this.value"></div>
+    </div>
+    <div class="hp" aria-hidden="true"><label for="su-honey">Leave this field empty</label><input type="text" id="su-honey" name="_honey" tabindex="-1" autocomplete="off"></div>
+    <label class="chk" for="su-agree"><input type="checkbox" id="su-agree" name="agree" required ${CT.agree?"checked":""} onchange="CT.agree=this.checked"><span><b>I agree to be contacted by the Industrial Concussion Institute.</b></span></label>
+    <div class="nav"><button type="submit" class="btn pri" id="su-send" ${CT.status==="sending"||CT.status==="ok"?"disabled":""}>${CT.status==="sending"?"Sending...":"Send"}</button></div>
+    <p class="sumsg ${CT.status==="ok"?"ok":(CT.status==="err"?"err":"")}" id="su-msg" role="status" aria-live="polite">${esc(CT.msg)}</p>
+  </form>
+  </section>`;
+}
+function signupMsg(status,msg){
+  CT.status=status;CT.msg=msg;
+  const m=document.getElementById("su-msg"),b=document.getElementById("su-send");
+  if(m){m.textContent=msg;m.className="sumsg "+(status==="ok"?"ok":(status==="err"?"err":""));}
+  if(b){b.disabled=(status==="sending"||status==="ok");b.textContent=status==="sending"?"Sending...":"Send";}
+}
+async function signupSubmit(e){
+  e.preventDefault();
+  if(CT.status==="sending"||CT.status==="ok")return false;
+  const f=e.target;
+  const name=f.elements["name"].value.trim(), email=f.elements["email"].value.trim();
+  const org=f.elements["organization"].value.trim(), role=f.elements["role"].value.trim();
+  const honey=f.elements["_honey"].value;
+  if(!name){signupMsg("err","Please enter your name.");f.elements["name"].focus();return false;}
+  if(!email||!f.elements["email"].checkValidity()){signupMsg("err","Please enter a valid email address.");f.elements["email"].focus();return false;}
+  if(!f.elements["agree"].checked){signupMsg("err","Please check the box to agree to be contacted.");f.elements["agree"].focus();return false;}
+  if(honey){signupMsg("ok","Thanks, you're on the list.");return false;} // bot trap: do not send
+  const payload={ // contact fields only
+    name, email, organization:org, role,
+    timestamp:new Date().toISOString(), source:"ICAT v1.1",
+    _subject:"New ICAT contact sign-up", _template:"table", _captcha:"false", _honey:""
+  };
+  signupMsg("sending","Sending...");
+  try{
+    const r=await fetch(SIGNUP_URL,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(payload)});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&(d.success===true||d.success==="true")){signupMsg("ok","Thanks, you're on the list.");}
+    else{signupMsg("err","Sorry, that didn't go through. Please try again later or email info@industrialconcussion.org.");}
+  }catch(err){
+    signupMsg("err","Sorry, that didn't go through. Check your connection and try again, or email info@industrialconcussion.org.");
+  }
+  return false;
 }
 
 render();
